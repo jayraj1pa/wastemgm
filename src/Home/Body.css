@@ -1,0 +1,6 @@
+@keyframes moveUpDown {
+    to {
+      transform: translateY(-20px);
+    }
+  }
+  
