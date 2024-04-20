@@ -3,6 +3,8 @@ import Footer from "../Footy";
 import NavComponent from "../NavComponent";
 import { Link } from "react-router-dom";
 import "../Auth/Home.css";
+import WhatsAppWidget from 'react-whatsapp-widget';
+
 
 function Home() {
   const [admincheck, setAdmincheck] = useState("");
@@ -20,7 +22,7 @@ function Home() {
       <NavComponent />
       <div
         style={{
-          backgroundImage: "url('/images/home.png')",
+          backgroundImage:      "url('/images/home.png')",
           height: "100vh",
           backgroundSize: "contain",
           backgroundPosition: "center",
@@ -58,7 +60,7 @@ function Home() {
       style={{ width: "80%", marginBottom: "10px" }}
       alt="Illegal Waste Reporting"
     />
-    <h5>Illegal Waste Reporting</h5>
+    <h5 style={{marginRight:"100px"}}>Illegal Waste Reporting</h5>
   </div>
 </Link>
 
@@ -76,7 +78,7 @@ function Home() {
                 style={{ width: "80%", marginBottom: "10px" }}
                 alt="Waste Scheduling"
               />
-              <h5>Waste Scheduling</h5>
+              <h5 style={{marginRight:"80px"}}>Waste Scheduling</h5>
             </div>
           </Link>
 
@@ -92,7 +94,7 @@ function Home() {
                 style={{ width: "80%", marginBottom: "10px" }}
                 alt="Shopping Mart"
               />
-              <h5>Shopping Mart</h5>
+              <h5 style={{marginRight:"50px"}}>Shopping Mart</h5>
             </div>
           </Link>
 
@@ -108,7 +110,7 @@ function Home() {
                 style={{ width: "75%", marginBottom: "10px" }}
                 alt="Community"
               />
-              <h5>Community</h5>
+              <h5 style={{marginRight:"100px"}}>Community</h5>
             </div>
           </Link>
 
@@ -125,24 +127,48 @@ function Home() {
       </div>
 
       
-      <div className="d-flex justify-content-center align-items-center mt-3 ">
-       <div className="d-flex me-1 ms-1"></div>
+      <div style={{display:"flex",justifyContent:"space-around"}}  className=" mt-3 ">
+       <div className="d-flex mt-4"></div>
        { admincheck === "true" && <Link
             to={"/adminUsers"}
             style={{ textDecoration: "none", color: "inherit" }}
           >
-            <div className="text-center hoverEffect">
+            <div className="text-center hoverEffect mt-4  ">
               <img
+              
                 src="/images/users.jpg"
-                style={{ width: "40%", marginBottom: "10px" }}
+                style={{ width: "40%", marginBottom: "1px", }}
                 alt="Community"
               />
-              <h5>View Users</h5>
+              <h5 className="mt-3" style={{marginRight:"330px"}}>View Users</h5>
             </div>
           </Link>
 }
+
+
+
+
+{ admincheck === "true" && <Link
+            to={"/adminCheckout"}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <div className="text-center hoverEffect mt-5 ">
+              <img
+              
+                src="/images/purchase.png"
+                style={{ width: "40%", marginBottom: "1px", }}
+                alt="Community"
+              />
+              <h5 className="mt-3" style={{marginRight:"300px"}}>Purchase Reports</h5>
+            </div>
+          </Link>
+}
+
+
 </div>
       <Footer />
+      
+
     </div>
   );
 }

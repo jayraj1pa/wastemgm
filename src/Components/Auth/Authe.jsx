@@ -3,6 +3,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../../service/allAPI";
+import { useToast } from "@chakra-ui/react";
+
 
 function Authe() {
   const [userData, setUserData] = useState({
@@ -11,6 +13,8 @@ function Authe() {
   });
 
   const history = useNavigate()
+  const toast = useToast();
+
 
 
   const handleLogin = async (e) => {
@@ -48,7 +52,23 @@ function Authe() {
 
       
     }else{
-      alert(result.response.data)
+     
+     
+     
+      toast({
+        title: "Error Occured!",
+        description: result.response.data,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-left",
+      });
+     
+     
+     
+     
+     
+     
       console.log(result);
     }
 

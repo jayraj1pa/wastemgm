@@ -46,7 +46,7 @@ export const alladminSchedulings = async (reqHeader)=>{
     return await commonAPI("GET",`${BASE_URL}/admin/Scheduleview`,"",reqHeader)
   
 }
-
+// admin user view
 export const alladminUsers = async (reqHeader)=>{
     return await commonAPI("GET",`${BASE_URL}/admin/UsersView`,"",reqHeader)
 }
@@ -57,8 +57,8 @@ export const adminAddCommunity = async(reqBody,reqHeader)=>{
 }
 
 // view-community
-export const viewCommunity = async()=>{
-    return await commonAPI("GET",`${BASE_URL}/all/community`,"","")
+export const viewCommunity = async(reqHeader)=>{
+    return await commonAPI("GET",`${BASE_URL}/all/community`,{},reqHeader)
  
 }
 
@@ -69,14 +69,11 @@ export const adminAddProducts =  async(reqBody,reqHeader)=>{
 }
 
 
-// view-community
+// view-products
 export const viewProducts = async()=>{
     return await commonAPI("GET",`${BASE_URL}/all/products`,"","")
  
 }
-
-
-
 
 // editProfileAPi
 export const editProfileAPI = async(reqBody,reqHeader)=>{
@@ -93,19 +90,81 @@ export const deleteReportAPI = async(reportId,reqHeader)=>{
 
 } 
 
-
 // edit report API
-export const editReportAPI = async (reportId,reqBody,reqHeader)=>{
-    return await commonAPI("PUT",`${BASE_URL}/edit/${reportId}`,reqBody,reqHeader)
+export const editReportAPI = async(reportId,reqBody,reqHeader)=>{
+    return await commonAPI("PUT",`${BASE_URL}/report/edit/${reportId}`,reqBody,reqHeader)
 }
 
-// delete reportApi
+
+// edit scheduling API
+export const editSchedulingAPI = async(scheduleId,reqBody,reqHeader)=>{
+    return await commonAPI("PUT",`${BASE_URL}/schedule/edit/${scheduleId}`,reqBody,reqHeader)
+}
+
+
+
+
+
+// delete schedule
 export const deleteScheduleAPI = async(scheduleId,reqHeader)=>{
     return await commonAPI("DELETE",`${BASE_URL}/delete/schedule/${scheduleId}`,{},reqHeader)
 
 } 
 
 
+// delete schedule
+export const deleteCommunityAPI = async(scheduleId,reqHeader)=>{
+    return await commonAPI("DELETE",`${BASE_URL}/delete/community/${scheduleId}`,{},reqHeader)
+
+} 
 
 
 
+export const deleteProductAPI = async(scheduleId,reqHeader)=>{
+    return await commonAPI("DELETE",`${BASE_URL}/delete/product/${scheduleId}`,{},reqHeader)
+
+}
+
+
+// update Report admin
+export const updateReportStatus = async (reportId, newStatus, reqHeader) => {
+    return await commonAPI("PUT", `${BASE_URL}/admin/reports/update-status`, { reportId, status: newStatus }, reqHeader);
+};
+
+
+// update Schedule admin
+export const updateScheduleStatus = async (scheduleId, newStatus, reqHeader) => {
+    return await commonAPI("PUT", `${BASE_URL}/admin/schedule/update-status`, { scheduleId, status: newStatus }, reqHeader);
+};
+
+
+// update community
+export const updateCommunityJoin = async (id, status, reqHeader) => {
+    return await commonAPI("PUT", `${BASE_URL}/community/update-status`, { id, status: status }, reqHeader);
+};
+
+
+// feedback user
+export const feedbackAPI = async (reqBody,reqHeader)=>{
+    return await commonAPI("POST",`${BASE_URL}/sumbit/feedback`,reqBody,reqHeader)
+}
+
+
+// admin feedback
+export const viewfeedback = async (reqHeader)=>{
+    return await commonAPI("GET",`${BASE_URL}/admin/viewfeedback`,reqHeader)
+}
+
+
+// get Coins
+export const coinsApi = async(reqHeader)=>{
+    return await commonAPI("GET",`${BASE_URL}/coins`,{},reqHeader)
+}
+
+export const checkoutAPI = async (reqBody,reqHeader)=>{
+    return await commonAPI("POST",`${BASE_URL}/checkout`,reqBody,reqHeader)
+}
+
+export const checkoutAPIAdmin = async(reqBody)=>{
+    return await commonAPI("GET",`${BASE_URL}/admin/checkout`,{},reqBody)
+}

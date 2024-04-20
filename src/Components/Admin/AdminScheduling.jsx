@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { createContext } from 'react'
 import NavComponent from "../NavComponent";
-import { Row, Col } from "react-bootstrap";
+import { Row, Col,Button, Table } from "react-bootstrap";
 import { useState,useEffect } from 'react';
-import { alladminSchedulings } from '../../service/allAPI';
+import { alladminSchedulings, updateScheduleStatus } from '../../service/allAPI';
+import { schedulingData } from '../../service/ContextShare';
+import { useContext } from 'react';
+
 
 function AdminScheduling() {
+  const {scheduleStatus,setScheduleStatus} = useContext(schedulingData)
  
 
 const [userScheduling, setUserScheduling] = useState([]);
@@ -45,6 +49,44 @@ const [userScheduling, setUserScheduling] = useState([]);
     setSearchQuery(e.target.value);
   };
 
+  const token = sessionStorage.getItem("token");
+
+
+
+  const handleStatusUpdate = async (scheduleId, newStatus) => {
+    try {
+      // console.log('Updating status...', reportId, newStatus);
+  
+      const reqHeader = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+  
+      const result = await updateScheduleStatus(scheduleId, newStatus, reqHeader);
+  
+      // console.log('Update result:', result);
+  
+      if (result.status === 200) {
+        // Reload the reports after the status update
+        getallSchedule();
+        // console.log("hii", ); // Incorrect casing (Status instead of status)
+
+         setScheduleStatus(result.data.status)
+
+      } else {
+        console.log(result);
+      }
+    } catch (error) {
+      console.error("Failed to update schedule status:", error);
+    }
+  };
+
+
+
+
+
+  
+
   return (
     <div>
       <NavComponent />
@@ -54,47 +96,70 @@ const [userScheduling, setUserScheduling] = useState([]);
 
       <form>
         <div
-          style={{ marginTop: "20px" }}
-          className="ms-5 d-flex justify-content-center align-items-center border w-50 rounded"
+          style={{ marginTop: "20px" ,marginLeft:"500px"}}
+          className="mt-4 d-flex justify-content-center align-items-center border w-50 rounded"
         >
           <input
             type="text"
             className="form-control"
-            placeholder="Search Your Requests By House Number"
+            placeholder="Search Your Requests By Location"
             value={searchQuery}
             onChange={handleSearch}
           />
         </div>
       </form>
 
-      <Row  className="mt-4 container-fluid">
-        {filterData?.length > 0
-          ? filterData.map((schedule) => (
-              <Col
-              style={{
-                backgroundImage: "url('/images/scheduling.jpeg')",
-                height: "30vh",
-                backgroundSize: "100%",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                width: "25vw",
+<div style={{display:"flex",justifyContent:"center"}}>
 
-              }}
-                className="card shadow me-5 ms-5 mb-5"
-                sm={4}
-                md={4}
-                lg={4}
-                key={schedule.id}
-              >
-             <p style={{fontWeight:"bolder",fontSize:"20px"}}>Scheduled By: {schedule.userId.username}</p>
-                <p style={{fontWeight:"bolder",fontSize:"20px"}} className="mt-3">House Number: {schedule.houseNumber}</p>
-                <p style={{fontWeight:"bolder",fontSize:"20px"}}>Waste Quantity: {schedule.wasteQuantity}</p>
-                <p style={{fontWeight:"bolder",fontSize:"20px"}} >Date: {schedule.edate}</p>
-                <p style={{fontWeight:"bolder",fontSize:"20px"}}>Time: {schedule.etime}</p>
-              </Col>
-            ))
-          : null}
-      </Row>
+      <Table className='mt-5' style={{width:"90%"}} bordered >
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Scheduled By</th>
+      <th>Location</th>
+      <th>Waste Quantity</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filterData?.length > 0 &&
+      filterData.map((schedule,index) => (
+        <tr key={schedule.id}>
+          <td>{index + 1}</td>
+          <td>{schedule.userId ? schedule.userId.username : 'Unknown User'}</td>
+          <td>{schedule.houseNumber}</td>
+          <td>{schedule.wasteQuantity}</td>
+          <td>{schedule.edate}</td>
+          <td>{schedule.etime}</td>
+          <td>{schedule.status}</td>
+          <td>
+            <Button
+              variant="success"
+              onClick={() => handleStatusUpdate(schedule._id, 'Collected')}
+            >
+              Mark as Collected
+            </Button>
+
+           
+
+            <Button
+              className="ms-2"
+              variant="warning"
+              onClick={() => handleStatusUpdate(schedule._id, 'Make Payment')}
+            >
+              Pay
+            </Button>
+          </td>
+        </tr>
+      ))}
+  </tbody>
+</Table>
+
+</div>
+
     </div>
 
 

@@ -3,8 +3,17 @@ import { Col, Row } from "react-bootstrap";
 import NavComponent from "../NavComponent";
 import { Link, useNavigate } from "react-router-dom";
 import { deleteMyProfile, editProfileAPI } from "../../service/allAPI";
+import { useToast } from "@chakra-ui/react";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal'
 
 function Eco() {
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   const [profile, setProfile] = useState({
     username: "",
     email: "",
@@ -14,6 +23,8 @@ function Eco() {
 
 
   const history = useNavigate();
+  const toast = useToast();
+
 
   
 
@@ -32,7 +43,19 @@ function Eco() {
   const handleEdit = async () => {
     const { username, email, password, address } = profile;
     if (!address) {
-      alert("please fill the form completely");
+      
+
+      toast({
+        title: "Error Occured!",
+        description: "Complete the form ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+
+
+
     } else {
       const token = sessionStorage.getItem("token");
       if (token) {
@@ -45,6 +68,20 @@ function Eco() {
         if (result.status === 200) {
           history("/ecoprofile");
           sessionStorage.setItem("existingUser", JSON.stringify(result.data));
+
+
+          toast({
+            title: "User Details Updated",
+            // description: " ",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+            position: "top-left",
+          });
+    
+
+
+
         } else {
           console.log(result);
           console.log(result.response.data);
@@ -160,7 +197,7 @@ function Eco() {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDelete(_id)}
+                onClick={handleShow}
                   className="mt-2 btn btn-danger"
                 >
                   Delete My Account
@@ -290,6 +327,41 @@ function Eco() {
           </Row>
         </div>
       </div>
+
+
+
+      
+     
+      <Modal
+  show={show}
+  onHide={handleClose}
+  centered // Add the centered prop to vertically center the modal
+  size="lg" // Set the size to "lg" for a larger modal
+
+  backdrop="static"
+  keyboard={false}
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Deleting Account</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+<p  style={{fontWeight:"bolder",fontSize:"25px"}}>Deleting your account will remove all of your </p> 
+<p   style={{fontWeight:"bolder",fontSize:"25px",marginTop:"-20px"}}>information from our database.</p>
+ <p>This cannot be undone to conform this press  <span style={{fontWeight:"bold"}}>Delete</span> </p> 
+
+
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleClose}>
+      Close 
+    </Button>
+    <Button   onClick={() => handleDelete(_id)}  className="btn btn-danger">Delete</Button>
+  </Modal.Footer>
+</Modal>
+
+
+
+
     </div>
   );
 }

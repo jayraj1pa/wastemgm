@@ -23,8 +23,14 @@ function Logout() {
   }, []);
 
   return (
-    <div>
-      Logging out...
+    <div style={{
+      backgroundImage:      "url('/images/home.png')",
+      height: "100vh",
+      backgroundSize: "contain",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }}>
+      {/* Logging out... */}
     </div>
   );
 }

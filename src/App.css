@@ -1,0 +1,76 @@
+::-webkit-scrollbar {
+    width: 0px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(136, 136, 136, 0.281);
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+
+  /* Add this CSS to your component or global styles */
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card img {
+  transition: transform 0.2s;
+}
+
+.card:hover img {
+  transform: scale(1.1);
+}
+
+.card .card-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card:hover .card-overlay {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.slide-in-animation {
+  animation: slideIn 2s ease-in-out;
+}
+
+
+/* Add this to your styles or CSS file */
+.transition-fade {
+  opacity: 0;
+  transition: opacity 0.7s ease; /* Adjust the duration and easing function as needed */
+}
+
+.transition-fade.show {
+  opacity: 5;
+}
+
+
+/* Add this to your styles or CSS file
+.card-container:hover {
+  background-color: #69BE91; /* Change this color to your desired hover background color */
+  /* transition: background-color 0.3s ease; Adjust the duration and easing function as needed */
+/* } */ */
+
+/* If you have Bootstrap included in your project, the following should work: */
+.table-hover tbody tr:hover {
+  background-color: #69BE91;
+  transition: background-color 0.3s ease;
+  /* Adjust the duration and easing function as needed */
+}
+
+

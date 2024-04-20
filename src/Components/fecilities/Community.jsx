@@ -3,14 +3,20 @@ import { Button, Row, Col } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import NavComponent from "../NavComponent";
-import { viewCommunity } from "../../service/allAPI";
+import { updateCommunityJoin, viewCommunity } from "../../service/allAPI";
 import { BASE_URL } from "../../service/BaseUrl";
+import { useToast } from "@chakra-ui/react";
+import NavCommunity from "./NavCommunity";
+import NavFooter from './NavFooter';
+import CommunitySlider from "./CommunitySlider";
+
+
+
 
 function Community() {
   const [vCommunity, setVCommunity] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
     const getCommunity = async () => {
       try {
         if (sessionStorage.getItem("token")) {
@@ -19,7 +25,7 @@ function Community() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           };
-          const result = await viewCommunity();
+          const result = await viewCommunity(reqHeader);
           if (result.status === 200) {
             setVCommunity(result.data);
           } else {
@@ -31,8 +37,16 @@ function Community() {
       }
     };
 
-    getCommunity();
-  }, []);
+    
+  useEffect(()=>{
+    getCommunity()
+  },[])
+
+
+
+  
+  const toast = useToast();
+
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -42,14 +56,110 @@ function Community() {
     community.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleJoinCommunity = (title) => {
-    // Customize the alert message with the community title
-    alert(`Thank you for joining the community: ${title}`);
+
+  const token = sessionStorage.getItem("token");
+
+
+  const handleJoinCommunity = async (id, status) => {
+    try {
+      const reqHeader = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+  
+      const result = await updateCommunityJoin(id, status, reqHeader);
+  
+      if (result.status === 200) {
+        getCommunity()
+
+        // Reload the reports after the status update
+  
+        // Conditionally render toast based on the status
+        const toastMessage =
+          status === "join"
+            ? "Thanks for Showing Interest in Joining the community"
+            :  "You have left the community"
+            
+
+            const toastStatus = 
+            status === "join"
+            ? "success"
+            : "error"
+
+  
+        if (toastMessage) {
+          toast({
+            title: "",
+            description: toastMessage,
+            status: toastStatus,
+            duration: 5000,
+            isClosable: true,
+            position: "top",
+          });
+        }
+  
+      } else {
+        console.log(result);
+      }
+    } catch (error) {
+      console.error("Failed to update community status:", error);
+    }
   };
+  
+  
+
+
+
 
   return (
     <div>
-      <NavComponent />
+    <NavCommunity/>
+
+
+
+    <div>
+
+
+    <Row>
+  <Col sm={12} md={6} lg={6}>
+
+<div style={{marginLeft:"200px",marginTop:"130px"}}>
+
+
+<p className="slide-in-animation" style={{fontSize:"70px",fontWeight:"bolder"}}>
+        Join Our
+      </p>
+      <p className="slide-in-animation" style={{fontSize:"70px",marginTop:"-45px",fontWeight:"bolder"}}>
+        Community
+      </p>
+
+
+<p style={{fontSize:"29px",fontColor:"#6F3A40"}}>
+
+
+
+Embark on a journey with our vibrant community, uniting individuals passionate about sustainable living, waste recycling, and impactful campaigns. Join us in fostering positive change,</p>
+
+</div>
+
+
+  </Col>
+
+
+  <Col>
+
+<CommunitySlider/>
+
+  
+  </Col>
+</Row>
+
+
+    </div>
+    
+
+
+     
 
       <div
         style={{ marginTop: "5%" }}
@@ -76,8 +186,8 @@ function Community() {
         {filteredCommunity.length > 0 ? (
           filteredCommunity.map((community) => (
             <Col
-              style={{ width: "25vw" }}
-              className="card shadow me-5 ms-5 mb-5"
+              style={{ width: "25vw",marginLeft:"100px" }}
+              className="card shadow me-5  mb-5"
               sm={4}
               md={4}
               lg={4}
@@ -93,18 +203,36 @@ function Community() {
                 alt="community Image"
               />
               <p className="mt-3" style={{textAlign:"center"}}> Community  : {community.title}</p>
-              <Button
-                className="mt-3 bg-success"
-                onClick={() => handleJoinCommunity(community.title)}
-              >
-                Join
-              </Button>
+              <p className="mt-3" style={{textAlign:"center"}}> Date  : {community.eDate}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> Desc  : {community.Desc}</p>
+
+              {
+  community.status === "Left" || community.status === null ?
+    <Button
+      className="mt-3 bg-success"
+      onClick={() => handleJoinCommunity(community._id, "join")}
+    >
+      Join
+    </Button>
+    :
+    <Button
+      className="mt-3 bg-danger mb-3"
+      onClick={() => handleJoinCommunity(community._id, "Left")}
+    >
+      Left Community
+    </Button>
+}
+
+
+
+
             </Col>
           ))
         ) : (
           <p>No matching communities found.</p>
         )}
       </Row>
+      <NavFooter/>
     </div>
   );
 }

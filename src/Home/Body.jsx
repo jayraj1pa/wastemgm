@@ -57,7 +57,7 @@ function Body() {
               }}
             >
               {" "}
-              <span>with Put2Recycle</span>
+              <span>with Eco Community</span>
             </p>
             <p
               style={{

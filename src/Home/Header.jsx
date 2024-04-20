@@ -10,8 +10,7 @@ function Header() {
         <Navbar style={{marginLeft:"130px",width:"100%"}} className="bg-body-tertiary   " fixed="top">
           <Container>
             <Navbar.Brand href="#home">
-              <i class="fa-regular fa-registered fa-2xl" style={{ color: "#073a92" }}></i>
-            </Navbar.Brand>
+              <img src="https://cdn-icons-png.flaticon.com/512/11164/11164284.png" style={{width:"50px"}}/>            </Navbar.Brand>
           </Container>
 
           <Container>

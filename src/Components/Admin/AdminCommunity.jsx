@@ -4,14 +4,20 @@ import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import NavComponent from "../NavComponent";
-import { adminAddCommunity, viewCommunity } from "../../service/allAPI";
+import { adminAddCommunity, deleteCommunityAPI, viewCommunity } from "../../service/allAPI";
 import { BASE_URL } from "../../service/BaseUrl";
+import { Toast, useToast } from "@chakra-ui/react";
+
+
+
 
 function AdminCommunity() {
   const [vCommunity, setVCommunity] = useState([]);
   const [addCommunity, setAddCommunity] = useState({
     communityImage: "",
     title: "",
+    eDate: "", 
+    Desc:"",
   });
   const [show, setShow] = useState(false);
   const [token, setToken] = useState("");
@@ -27,33 +33,56 @@ function AdminCommunity() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    const { communityImage, title } = addCommunity;
-    if (!communityImage || !title) {
-      alert("Please fill the modal completely!!");
+    const { communityImage, title, eDate  ,Desc} = addCommunity; // Corrected here
+    if (!communityImage || !title || !eDate ||!Desc) {
+      toast({
+        title: "Error Occurred!",
+        description: "Fill the form completely ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
     } else {
       const reqBody = new FormData();
       reqBody.append("communityImage", communityImage);
       reqBody.append("title", title);
+      reqBody.append("eDate", eDate);
+      reqBody.append("Desc", Desc);
 
+  
       if (token) {
+        // console.log("Token:", token);
+
         const reqHeader = {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         };
-        const result = await adminAddCommunity(reqBody, reqHeader);
-        if (result.status === 200) {
-          setAddCommunity({
-            communityImage: "",
-            title: "",
-          });
-          handleClose();
-        } else {
-          console.log(result);
-          alert(result.response.data);
+        try {
+          const result = await adminAddCommunity(reqBody, reqHeader);
+          if (result.status === 200) {
+            setAddCommunity({
+              communityImage: "",
+              title: "",
+              eDate: "", // Include eDate in the reset state
+              Desc:"",
+            });
+            handleClose();
+            getCommunity()
+          } else {
+            // console.log(result.data);
+            alert(result.response.data);
+          }
+        } catch (error) {
+          console.error("Error adding community:", error);
         }
       }
     }
   };
+  
+
+  const toast = useToast();
+
 
   const getCommunity = async () => {
     try {
@@ -67,16 +96,24 @@ function AdminCommunity() {
         if (result.status === 200) {
           setVCommunity(result.data);
         } else {
-          console.log(result);
+          // console.log(result);
         }
       }
     } catch (error) {
-      console.error("Error fetching community:", error);
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
     }
   };
 
   useEffect(() => {
     getCommunity();
+    
   }, []);
 
   const handleSearch = (e) => {
@@ -89,6 +126,30 @@ function AdminCommunity() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+
+
+  const handleDelete = async (Id) => {
+    const token = sessionStorage.getItem("token");
+    const reqHeader = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+      const result = await deleteCommunityAPI(Id, reqHeader);
+      // console.log("Deleting Community with ID:", Id); // Add this line
+
+      if (result.status === 200) {
+        console.log("success");
+        getCommunity();
+      } else {
+        console.log(result.response.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
 
   return (
@@ -114,6 +175,8 @@ function AdminCommunity() {
             />
           </div>
         </form>
+
+        
 
         <Button
           style={{ marginRight: "200px" }}
@@ -145,6 +208,25 @@ function AdminCommunity() {
                 alt="community Image"
               />
               <p className="mt-3" style={{textAlign:"center"}}> Community  : {community.title}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> Date  : {community.eDate}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> Desc  : {community.Desc}</p>
+
+
+
+              
+<div className="hoverEffect">
+                  <button
+                    onClick={(e) => handleDelete(community._id)}
+                    className="btn"
+                  >
+                    <i
+                      class="fa-solid fa-trash fa-2x"
+                      style={{ color: "#fc030b" }}
+                    ></i>
+                  </button>
+                </div>
+
+
              
             </Col>
           ))
@@ -168,6 +250,42 @@ function AdminCommunity() {
                 setAddCommunity({
                   ...addCommunity,
                   title: e.target.value,
+                })
+              }
+            />
+          </Form.Group>
+
+
+          <Form.Group className="mb-3 mt-4 " controlId="formBasicPlaceName">
+            <Form.Label>Community Details</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter Community Details"
+              value={addCommunity.Desc}
+              onChange={(e) =>
+                setAddCommunity({
+                  ...addCommunity,
+                  Desc: e.target.value,
+                })
+              }
+            />
+          </Form.Group>
+
+
+          <Form.Group
+            style={{ width: "300px" }}
+            className="mb-3"
+            controlId="formBasicDate"
+          >
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              type="date"
+              min={new Date().toISOString().split("T")[0]}
+              value={addCommunity.eDate}
+              onChange={(e) =>
+                setAddCommunity({
+                  ...addCommunity,
+                  eDate: e.target.value,
                 })
               }
             />
@@ -201,5 +319,3 @@ function AdminCommunity() {
 }
 
 export default AdminCommunity;
-
-

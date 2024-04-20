@@ -5,20 +5,26 @@ import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import { adminAddProducts, viewProducts } from '../../service/allAPI';
+import { adminAddProducts, deleteProductAPI, viewProducts } from '../../service/allAPI';
 import { BASE_URL } from '../../service/BaseUrl';
+import { useToast } from '@chakra-ui/react';
+import { useContext } from 'react';
+import { addPriceContext } from '../../service/ContextShare';
+
 
 
 
 
 function AdminShopping() {
+  const {payPrice,setPayPrice} = useContext(addPriceContext)
       const [vProducts, setVProducts] = useState([]);
 
     const [show, setShow] = useState(false);
     const[ addProduct,setAddProduct]= useState({
         prductName:"",
         productImage:"",
-        productPrice:""
+        productPrice:"",
+        productDesc:""
     })
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,18 +40,35 @@ function AdminShopping() {
         }
       }, []);
 
+
+      const toast = useToast();
+
       
 
       const handleAdd = async (e) => {
         e.preventDefault();
-        const { productImage,productPrice,prductName } = addProduct;
-        if (!prductName || !productImage || !productPrice) {
-          alert("Please fill the modal completely!!");
+        const { productImage,productPrice,prductName,productDesc } = addProduct;
+        if (!prductName || !productImage || !productPrice || !productDesc) {
+          
+
+
+          toast({
+            title: "Error Occured!",
+            description: "Complete the form ",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-left",
+          });
+
+
+
         } else {
           const reqBody = new FormData();
           reqBody.append("productName", prductName);
           reqBody.append("productImage", productImage);
           reqBody.append("productPrice", productPrice);
+          reqBody.append("productDesc",productDesc)
 
     
           if (token) {
@@ -58,7 +81,8 @@ function AdminShopping() {
               setAddProduct({
                 prductName:"",
                 productImage:"",
-                productPrice:""
+                productPrice:"",
+                productDesc:""
               });
               handleClose();
             } else {
@@ -116,6 +140,32 @@ function AdminShopping() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+
+
+    const handleDelete = async (Id) => {
+      const token = sessionStorage.getItem("token");
+      const reqHeader = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      try {
+        const result = await deleteProductAPI(Id, reqHeader);
+        console.log("Deleting Products with ID:", Id); // Add this line
+  
+        if (result.status === 200) {
+          console.log("success");
+          getProducts();
+        } else {
+          console.log(result.response.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+
+
+
   return (
 
 
@@ -137,7 +187,7 @@ function AdminShopping() {
               style={{ width: "1000%" }}
               type="text"
               className="form-control"
-              placeholder="Search By Community Name"
+              placeholder="Search By Products Name"
               value={searchQuery}
               onChange={handleSearch}
             />
@@ -157,6 +207,7 @@ function AdminShopping() {
       <Row className="mt-4 container-et akkam">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((community) => (
+
             <Col
               style={{ width: "25vw" }}
               className="card shadow me-5 ms-5 mb-5"
@@ -174,8 +225,9 @@ function AdminShopping() {
                 }
                 alt="community Image"
               />
-              <p className="mt-3" style={{textAlign:"center"}}> Community  : {community.productName}</p>
-              <p className="mt-3" style={{textAlign:"center"}}> Community  : {community.productPrice}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> Name : {community.productName}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> price  : {community.productPrice}</p>
+              <p className="mt-3" style={{textAlign:"center"}}> Desc  : {community.productDesc}</p>
 
               {/* <Button
                 className="mt-3 bd-success"
@@ -183,10 +235,29 @@ function AdminShopping() {
               >
                 Join
               </Button> */}
+
+
+
+<div className="hoverEffect">
+                  <button
+                    onClick={(e) => handleDelete(community._id)}
+                    className="btn"
+                  >
+                    <i
+                      class="fa-solid fa-trash fa-2x"
+                      style={{ color: "#fc030b" }}
+                    ></i>
+                  </button>
+                </div>
+
+
+
+
+
             </Col>
           ))
         ) : (
-          <p>No matching communities found.</p>
+          <p>No matching Products found.</p>
         )}
       </Row>
 
@@ -242,6 +313,22 @@ function AdminShopping() {
                 setAddProduct({
                   ...addProduct,
                   productPrice: e.target.value,
+                })
+              }
+            />
+          </Form.Group>
+
+
+          <Form.Group className="mb-3 mt-4 " controlId="formBasicPlaceName">
+            <Form.Label>Product Desc</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter Product Desc"
+              value={addProduct.productDesc}
+              onChange={(e) =>
+                setAddProduct({
+                  ...addProduct,
+                  productDesc: e.target.value,
                 })
               }
             />

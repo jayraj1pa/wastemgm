@@ -18,10 +18,16 @@ import AdminUser from './Components/Admin/AdminUser';
 import AdminCommunity from './Components/Admin/AdminCommunity';
 import AdminShopping from './Components/Admin/AdminShopping';
 import Logout from './Components/Admin/Logout';
+import PaymentForm from './Components/Ecoprofile/Payment';
+import FeedBack from './Components/FeedBack';
+import AdminFeedback from './Components/Admin/AdminFeedback';
+import AdminCheckout from './Components/Admin/AdminCheckout';
+
 function App() {
   return (
     <div className="App">
  <BrowserRouter>
+
 <Routes> 
 <Route path={'/'} element={<Body/>} />   
 <Route path={'/auth'} element={<Auth/>}/>
@@ -42,7 +48,10 @@ function App() {
 <Route path='/adminCommunity' element={<AdminCommunity/>}/>
 <Route path='/adminShopping' element={<AdminShopping/>}/>
 <Route path='/dashboard' element={<Logout/>}/>
-
+<Route path='/payment' element={<PaymentForm/>}/>
+<Route path='/feedback' element={<FeedBack/>}/>
+<Route path='/adminFeedback' element={<AdminFeedback/>}/>
+<Route path='/adminCheckout' element={<AdminCheckout/>}/>
 
 
 </Routes>

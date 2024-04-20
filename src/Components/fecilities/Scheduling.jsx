@@ -3,6 +3,17 @@ import { Row, Col, Form, Button, Container } from "react-bootstrap";
 import "../fecilities/style.css";
 import { schedulingAPI } from "../../service/allAPI";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
+import OpenCageGeocode from "opencage-api-client";
+// Add this import at the beginning of your file
+import { BsGeoAlt } from 'react-icons/bs';
+// Add this import at the beginning of your file
+import { InputGroup } from "react-bootstrap";
+
+
+
+
+
 function Scheduling() {
   const [wasteScheduling, setWasteScheduling] = useState({
     houseNumber: "",
@@ -14,6 +25,8 @@ function Scheduling() {
   const [token, setToken] = useState("");
 
   const history = useNavigate();
+  const toast = useToast();
+
 
   useEffect(() => {
     if (sessionStorage.getItem("token")) {
@@ -27,7 +40,18 @@ function Scheduling() {
     e.preventDefault();
     const { houseNumber, wasteQuantity, edate, etime } = wasteScheduling;
     if (!houseNumber || !wasteQuantity || !edate || !etime) {
-      alert("please fill the form completely");
+
+
+      toast({
+        title: "Error Occured!",
+        description: "please fill the form completely ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+
+
     } else {
       if (token) {
         const reqHeader = {
@@ -35,20 +59,69 @@ function Scheduling() {
           Authorization: `Bearer ${token}`,
         };
 
-        const result = await schedulingAPI(wasteScheduling, reqHeader);
-        if (result.status === 200) {
-          setWasteScheduling({
-            houseNumber: "",
-            wasteQuantity: "",
-            edate: "",
-            etime: "",
-          });
-          history("/ecoschedule");
-        } else {
-          console.log(result);
-          console.log(result.response.data);
-        }
+
+
+
+
+       try {
+  const result = await schedulingAPI(wasteScheduling, reqHeader);
+  if (result.status === 200) {
+    setWasteScheduling({
+      houseNumber: "",
+      wasteQuantity: "",
+      edate: "",
+      etime: "",
+    });
+    history("/ecoschedule");
+  } else {
+    console.log(result);
+    console.log(result.response.data);
+  }
+} catch (error) {
+  console.error("An error occurred:", error);
+}
+
       }
+    }
+  };
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+  
+          try {
+            const result = await OpenCageGeocode.geocode({
+              q: `${latitude},${longitude}`,
+              key: '6153e12f88d04583ae94ab9ba01a715e', // Replace with your OpenCage API key
+            });
+  
+            if (result && result.results && result.results.length > 0) {
+              const locationName = result.results[0].formatted;
+              
+              // Update the state with the location name
+              setWasteScheduling({
+                ...wasteScheduling,
+                houseNumber: locationName,
+              });
+            } else {
+              console.error('Error getting location name from coordinates');
+              alert('Error getting location name. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error getting location name:', error.message);
+            alert('Error getting location name. Please try again.');
+          }
+        },
+        (error) => {
+          console.error('Error getting user location:', error.message);
+          alert('Error getting user location. Please try again.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
     }
   };
 
@@ -76,24 +149,32 @@ function Scheduling() {
           className="card ms-3   d-flex justify-content-center align-items-center "
         >
           <h3>Waste Scheduling </h3>
-          <Form.Group
-            style={{ width: "300px" }}
-            className="mb-3 mt-4 "
-            controlId="formBasicPAddress"
-          >
-            <Form.Label>Location</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder=" Your House Number"
-              value={wasteScheduling.houseNumber}
-              onChange={(e) =>
-                setWasteScheduling({
-                  ...wasteScheduling,
-                  houseNumber: e.target.value,
-                })
-              }
-            />
-          </Form.Group>
+          <Form.Group className="mb-3 mt-4" controlId="formBasicPlaceName">
+              <Form.Label>
+                <span className="d-flex align-items-center">
+                  Location <BsGeoAlt className="ms-2" />
+                </span>
+              </Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type="text"
+                  placeholder="Please provide the Location Details"
+                  value={wasteScheduling.houseNumber}
+                  onChange={(e) =>
+                    setWasteScheduling({
+                      ...wasteScheduling,
+                      houseNumber: e.target.value,
+                    })
+                  }
+                />
+                <Button
+                  variant="btn btn-success"
+                  onClick={getUserLocation}
+                >
+                  <BsGeoAlt />
+                </Button>
+              </InputGroup>
+            </Form.Group>
 
           <Form.Group
             style={{ width: "300px" }}

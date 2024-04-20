@@ -1,99 +1,135 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
-import { Row, Col, Form, Button, Container } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import { BASE_URL } from "../../service/BaseUrl";
-import { editProfileAPI } from "../../service/allAPI";
+import WasteReporting from "../fecilities/WasteReporting";
+import { useToast } from "@chakra-ui/react";
+import { editReportAPI } from "../../service/allAPI";
+import { useContext } from "react";
+import { addReportResponseContext } from "../../service/ContextShare";
+
 
 function ReportEdit({ report }) {
-  const [show, setShow] = useState(false);
-
-  const [reportDetails, setReportDetails] = useState({
-    reportImage: report.reportingImage,
+  const {addReportResponse,setAddReportResponse} = useContext(addReportResponseContext)
+  const [wasteReporting, setWasteReporting] = useState({
+    id: report._id,
+    reportingImage: "",
     location: report.location,
-    issueType: report.type,
-    id:report._id
+    type: report.type,
   });
-
-  console.log(reportDetails.reportImage);
 
   const [preview, setPreview] = useState("");
 
-  
+  const [show, setShow] = useState(false);
   const handleClose = () => {
-    setShow(false);
-    const setupdateReport = {
-      reportImage: report.reportingImage,
-      location: report.location,
-      issueType: report.type,
-      id: report._id,
-    };
-    setReportDetails(setupdateReport);
-    setPreview("");
-  };
-  
+  setShow(false);
+  setWasteReporting({
+    id: report._id,
+    reportingImage: "",
+    location: report.location,
+    type: report.type,
+  })
+  setPreview("")
+  }
+
+
+
+
+
+
+
 
   const handleShow = () => setShow(true);
 
-
   useEffect(() => {
-    if (reportDetails.reportImage) {
-      if (reportDetails.reportImage instanceof Blob) {
-        const objectUrl = URL.createObjectURL(reportDetails.reportImage);
-        setPreview(objectUrl);
-  
-        // Don't forget to revoke the object URL to avoid memory leaks
-        return () => URL.revokeObjectURL(objectUrl);
-      } else if (typeof reportDetails.reportImage === 'string') {
-        setPreview(reportDetails.reportImage);
-      }
+    if (wasteReporting.reportingImage) {
+      setPreview(URL.createObjectURL(wasteReporting.reportingImage));
     }
-  }, [reportDetails.reportImage]);
+  }, [wasteReporting.reportingImage]);
 
-  
-  
 
-const handleUpdate = async()=>{
-    const {id,reportImage,location,issueType} = reportDetails
-    if(!location || !issueType){
-        alert("please fill them completely")
-    }
-    else{
-        const reqBody = new FormData()
-        reqBody.append("location",location)
-        reqBody.append("issueType",issueType)
-        reqBody.append("reportImage",reportImage)
-        const token = sessionStorage.getItem("token")
-        console.log("g",token);
+
+  const toast = useToast();
+
+
+
+  const handleAdd = async()=>{
+    const  { id ,location ,type,reportingImage } = wasteReporting
+    if(!id || !location || !type ){      
+      console.log("id:", id);
+console.log("location:", location);
+console.log("type:", type);
+
+      toast({
+        title: "Error Occured!",
+        description: "please fill the Modal completely ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-left",
+      });
+    }else{
+      const reqBody = new FormData()
+      reqBody.append("location",location)
+      reqBody.append("type",type)
+      preview?reqBody.append("reportingImage",reportingImage):reqBody.append("reportingImage",report.reportingImage)
+
+      const token = sessionStorage.getItem("token")
+      if(preview){
         const reqHeader = {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          };
-          
-          const result = await editProfileAPI(id,reqBody,reqHeader)
-          if(result.status===200){
-            handleClose()
-            console.log("hii");
-          }else{
-            console.log(result);
-            console.log(result.response.data);
-          }
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        };
+
+        const result = await editReportAPI(id,reqBody,reqHeader)
+        if(result.status===200){
+          handleClose()
+          setAddReportResponse(result.data)
+        }else{
+          console.log(result);
+          toast({
+            title: "Error Occured!",
+            description: result.response.data,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top-left",
+          });
+
+        }
+
+      }else{
+        const reqHeader = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        const result = await editReportAPI(id,reqBody,reqHeader)
+        if(result.status===200){
+          handleClose()
+          setAddReportResponse(result.data)
+        }else{
+          console.log(result);
+          toast({
+            title: "Error Occured!",
+            description: result.response.data,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top-left",
+          });
+        }
+      }
+
+
 
     }
-}
-
-
-
-
-
-
-
+  }
 
   return (
     <div>
       <div className="hoverEffect">
         <button onClick={handleShow} className="btn">
-          <i class="fas fa-edit fa-2x" style={{ color: "#07ed1e" }}></i>
+          <i className="fas fa-edit fa-2x" style={{ color: "green" }}></i>
         </button>
       </div>
 
@@ -110,22 +146,29 @@ const handleUpdate = async()=>{
         <Modal.Body>
           <div className="row">
             <div className="col-lg-6">
-            <Form.Group controlId="formBasicImage">
-  <Form.Label>Incident Image</Form.Label>
-  <Form.Control
-    type="file"
-    onChange={(e) => {
-      const newImage = e.target.files[0];
-      setReportDetails({
-        ...reportDetails,
-        reportImage: newImage ? newImage : reportDetails.reportImage,
-      });
-    }}
-  />
-  <Form.Text className="text-muted">Please upload an image.</Form.Text>
-</Form.Group>
-
-
+              <label>
+                <input
+                  type="file"
+                  style={{
+                    display: "none",
+                  }}
+                  onChange={(e) =>
+                    setWasteReporting({
+                      ...wasteReporting,
+                      reportingImage: e.target.files[0],
+                    })
+                  }
+                />
+                <img
+                  className="img-fluid"
+                  src={
+                    preview
+                      ? preview
+                      : `${BASE_URL}/uploads/${report.reportingImage}`
+                  }
+                  alt="Incident"
+                />
+              </label>
             </div>
 
             <div className="col-lg-6">
@@ -133,10 +176,10 @@ const handleUpdate = async()=>{
                 type="text"
                 className="form-control"
                 placeholder="Enter location"
-                value={reportDetails.location}
+                value={wasteReporting.location}
                 onChange={(e) =>
-                  setReportDetails({
-                    ...reportDetails,
+                  setWasteReporting({
+                    ...wasteReporting,
                     location: e.target.value,
                   })
                 }
@@ -146,11 +189,11 @@ const handleUpdate = async()=>{
                 <Form.Label>Issue Type</Form.Label>
                 <Form.Select
                   defaultValue=""
-                  value={reportDetails.issueType}
+                  value={wasteReporting.type}
                   onChange={(e) =>
-                    setReportDetails({
-                      ...reportDetails,
-                      issueType: e.target.value,
+                    setWasteReporting({
+                      ...wasteReporting,
+                      type: e.target.value,
                     })
                   }
                 >
@@ -169,9 +212,11 @@ const handleUpdate = async()=>{
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+            Cancel
           </Button>
-          <Button onClick={handleUpdate} variant="primary">Edit</Button>
+          <Button onClick={handleAdd} variant="primary">
+            update
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

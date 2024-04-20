@@ -22,8 +22,8 @@ function NavComponent() {
           <Navbar.Brand as={Link} to={'/loginhome'}>
             <img
               alt=""
-              src="/img/logo.svg"
-              width="30"
+              src="https://cdn-icons-png.flaticon.com/512/11164/11164284.png"
+              width="30px"
               height="30"
               className="d-inline-block align-top"
             />{' '}
@@ -33,15 +33,24 @@ function NavComponent() {
 
         <div className='me-5'>
           <Nav>
-            <Nav.Link as={Link} to={ admin === "true" ? '/adminshopping' :  "/shopping"} className='hoverEffect' style={{ color: 'white' }}>
-              Shopping
-            </Nav.Link>
-            <Nav.Link as={Link} to="/wasteScheduling" className='hoverEffect' style={{ color: 'white' }}>
-              Waste pickup
-            </Nav.Link>
-            <Nav.Link as={Link} to="/ecoprofile" className='hoverEffect' style={{ color: 'white' }}>
-              Eco Profile
-            </Nav.Link>
+         
+          {sessionStorage.getItem("admin") === "false" && (
+  <>
+    <Nav.Link as={Link} to="/feedback" className="hoverEffect" style={{ color: 'white' }}>
+      Feedback
+    </Nav.Link>
+    <Nav.Link as={Link} to="/wasteScheduling" className='hoverEffect' style={{ color: 'white' }}>
+      Waste pickup
+    </Nav.Link>
+    <Nav.Link as={Link} to="/ecoprofile" className='hoverEffect' style={{ color: 'white' }}>
+      Eco Profile
+    </Nav.Link>
+  </>
+)}
+
+
+
+          
 
          
               <Nav.Link as={Link} to="/dashboard" className='hoverEffect' style={{ color: 'white' }}>

@@ -3,6 +3,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { Link, useNavigate } from "react-router-dom";
 import { registerAPI } from "../../service/allAPI";
+import { useToast } from "@chakra-ui/react";
+
 
 function Authe() {
   const [userData, setUserData] = useState({
@@ -10,6 +12,9 @@ function Authe() {
     email: "",
     password: "",
   });
+
+  const toast = useToast();
+
 
   const history = useNavigate()
   
@@ -19,7 +24,19 @@ function Authe() {
   
     try {
       if (!username || !email || !password) {
-        alert("Please fill the form completely");
+      
+
+
+        toast({
+          title: "Error Occured!",
+          description: "Fill the Form ",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom-left",
+        });
+
+
         return; // Exit the function early if form is not complete
       }
   
@@ -33,7 +50,18 @@ function Authe() {
         });
         history('/login');
       } else {
-        alert(result?.response?.data || "An error occurred");
+
+
+        toast({
+          title: "Error Occured!",
+          description: result?.response?.data || "An error occurred",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom-left",
+        });
+
+
         console.log(result);
       }
     } catch (error) {

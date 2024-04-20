@@ -1,11 +1,20 @@
-import React, { useEffect, useState } from 'react'
-import { viewProducts } from '../../service/allAPI';
-import NavComponent from '../NavComponent';
+import React, { useContext, useEffect, useState } from 'react'
+import { checkoutAPI, viewProducts } from '../../service/allAPI';
 import { Button, Col, Row } from 'react-bootstrap';
 import { BASE_URL } from '../../service/BaseUrl';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import { useNavigate } from 'react-router-dom';
+import NavShopping from './NavShopping';
+import NavFooter from './NavFooter';
+import ImageSlider from './ImageSlider';
+import { addPriceContext, paymentContext } from '../../service/ContextShare';
+
+
+
+
+
 
 
 
@@ -13,6 +22,8 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 
 function Shopping() {
+  const {payment,setPayment} =  useContext(paymentContext)
+  const {payPrice,setPayPrice} = useContext(addPriceContext)
   const [viewProduct, setViewProduct] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -24,6 +35,7 @@ function Shopping() {
 
 
 
+const nav = useNavigate()
   useEffect(() => {
     const getProducts = async () => {
       try {
@@ -67,16 +79,107 @@ function Shopping() {
 
 
 
+  const handleAdd = async (Product) =>{
+    const { _id: productId, productName, productPrice } = Product;
+   const token = sessionStorage.getItem("token")
+   const reqHeader = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+  const NewPrice =  productPrice.split(" ")[1]
+  // console.log(NewPrice);
+  const user = sessionStorage.getItem("existingUser")
+const detail = JSON.parse(user)
+
+  console.log(detail.username);
+
+  const items = [
+    {
+      productId: productId,
+      productName: productName,
+      productPrice: NewPrice,
+      username:detail.username,
+      address:detail.address
+      // Add any other necessary product fields
+    }
+  ];
+  
+
+  try {
+    const result = await checkoutAPI({items},reqHeader)
+    console.log(Product);
+    if(result.status=== 200){
+      console.log(result.data);
+    } else {
+      console.log(result);
+      console.log(result.response.data);
+    }
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+
+  }
+
+
+
+
 
   return (
     <div>
 
 
   
-<NavComponent />
+<NavShopping/>
+
+
+<div>
+
+
+<Row>
+  <Col sm={12} md={6} lg={6}>
+
+<div style={{marginLeft:"200px",marginTop:"130px"}}>
+
+
+<p style={{fontSize:"70px",fontWeight:"bolder"}}>
+Welcome to Our
+</p>
+
+<p style={{fontSize:"70px",marginTop:"-45px",fontWeight:"bolder"}}>
+Online Store
+</p>
+
+
+<p style={{fontSize:"29px",fontColor:"#6F3A40"}}>
+
+
+
+Discover the latest and greatest in fashion. Our collection features premium products for every style and occasion. From casual to formal, we've got you covered.
+</p>
+
+</div>
+
+
+  </Col>
+
+
+  <Col>
+
+<ImageSlider/>
+
+  
+  </Col>
+</Row>
+
+  
+</div>
+
+
+
+
 
       <div
-        style={{ marginTop: "5%" }}
+        style={{ marginTop: "10%",marginBottom:"10%" }}
         className="d-flex justify-content-between align-items-center"
       >
         <form>
@@ -88,7 +191,7 @@ function Shopping() {
               style={{ width: "1000%" }}
               type="text"
               className="form-control"
-              placeholder="Search By Community Name"
+              placeholder="Search By Product Name"
               value={searchQuery}
               onChange={handleSearch}
             />
@@ -103,8 +206,8 @@ function Shopping() {
         {filteredProduct.length > 0 ? (
           filteredProduct.map((community) => (
             <Col
-              style={{ width: "25vw" }}
-              className="card shadow me-5 ms-5 mb-5"
+              style={{ width: "22vw", backgroundColor: "#F0F0F0", marginLeft: "150px", transition: "transform 0.2s" }}
+              className="card rounded shadow me-3 mb-5"
               sm={4}
               md={4}
               lg={4}
@@ -118,16 +221,30 @@ function Shopping() {
                     : null
                 }
                 alt="community Image"
+                style={{ width: "100%", height: "auto", transition: "transform 0.2s" }}
               />
-              <p className="mt-3" style={{textAlign:"center"}}> Name : {community.productName}</p>
-              <p className="mt-3" style={{textAlign:"center"}}> Price  : {community.productPrice}</p>
+             
+                <p className="mt-3">{community.productName}</p>
+                <p className="mt-2">{community.productDesc}</p>
+                <hr style={{ marginTop: "-20px" }} />
+                <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                 
 
-              <Button
-                className="mt-3 bg-success"
-                onClick={() => handleShow()}
-              >
-                Buy
-              </Button>
+                <Button
+      style={{ width: "200px" }}
+      className="mb-1 btn-success rounded"
+      onClick={() => {
+        
+        handleAdd(community);
+        setPayPrice(community.productPrice);
+        nav("/payment", { price: community.productPrice });
+      }}
+    >
+      {community.productPrice}
+    </Button>
+
+                  
+                </div>
             </Col>
           ))
         ) : (
@@ -189,7 +306,7 @@ function Shopping() {
         </Modal.Footer>
       </Modal>
 
-
+<NavFooter/>
 
     </div>
   )

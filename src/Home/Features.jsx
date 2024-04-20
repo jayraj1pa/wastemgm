@@ -122,27 +122,7 @@ function Features() {
                 ></i>
                 payBill
               </li>
-              <li>
-                <i
-                  className="fa-regular fa-trash-can me-3"
-                  style={{ color: "#1459d2", marginTop: "35px" }}
-                ></i>
-                Waste Segregation
-              </li>
-              <li>
-                <i
-                  className="fa-solid fa-recycle me-3"
-                  style={{ color: "#1459d2", marginTop: "35px" }}
-                ></i>
-                Recycle Centers
-              </li>
-              <li>
-                <i
-                  className="fa-regular fa-comments me-3"
-                  style={{ color: "#1459d2", marginTop: "35px" }}
-                ></i>
-                Chat
-              </li>
+          
               </ol>
           </Col>
           </Row>
